@@ -1,12 +1,17 @@
 {
-  "name": "MotoMaker",
-  "author": "MakeAwesomeHappen",
+  "name": "moto-maker",
+  "author": "lavendork",
   "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": ["moto 360", "analog", "customizable"],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "pebble-clay": "^1.0.4"
+  },
   "pebble": {
-    "displayName": "MotoMaker",
+    "capabilities": [
+      "configurable"
+    ],
+    "displayName": "Moto Maker",
     "uuid": "fddfe930-e766-4acc-be04-fa97afc8e8ed",
     "sdkVersion": "3",
     "enableMultiJS": true,
@@ -17,10 +22,17 @@
       "diorite"
     ],
     "watchapp": {
-      "watchface": false
+      "watchface": true
     },
     "messageKeys": [
-      "dummy"
+      "colorBackground",
+      "colorDot",
+      "colorMarkers",
+      "colorHourHand",
+      "colorMinuteHand",
+      "colorSecondHand",
+      "enableSecondHand",
+      "enableHideDotOnDisconnect"
     ],
     "resources": {
       "media": []
