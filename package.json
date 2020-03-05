@@ -2,7 +2,11 @@
   "name": "moto-maker",
   "author": "lavendork",
   "version": "1.0.0",
-  "keywords": ["moto 360", "analog", "customizable"],
+  "keywords": [
+    "moto 360",
+    "analog",
+    "customizable"
+  ],
   "private": true,
   "dependencies": {
     "pebble-clay": "^1.0.4"
