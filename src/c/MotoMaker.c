@@ -26,10 +26,13 @@ static void draw_hand(
   int thickness,
   GColor color
 ) {
+  // Calculate where the end point of the hand goes
   GPoint hand_end = {
     .x = (int16_t)(sin_lookup(angle) * (int32_t)length / TRIG_MAX_RATIO) + center.x,
     .y = (int16_t)(-cos_lookup(angle) * (int32_t)length / TRIG_MAX_RATIO) + center.y,
   };
+
+  draw_line(ctx, center, hand_end, thickness, color);
 }
 
 static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
@@ -37,9 +40,9 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
   GPoint center = grect_center_point(&bounds);
 
   graphics_context_set_fill_color(ctx, GColorBlack);
-  //graphics_fill_rect(ctx, bounds, 0, null); crashes please help
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
-  const int16_t max_hand_length = (bounds.size.w / 2) - 19;
+  const int16_t max_hand_length = (bounds.size.w -10) / 2;
   
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
@@ -54,7 +57,7 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
   int32_t hour_angle = (TRIG_MAX_ANGLE * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6);
   
   // draw shadow for hour hand, so it doesnt get obscured
-  draw_hand(ctx, center, hour_angle, max_hand_length * 0.6, 7, GColorBlack);
+  draw_hand(ctx, center, hour_angle, max_hand_length * 0.6, 8, GColorBlack);
   // draw hour hand
   draw_hand(ctx, center, hour_angle, max_hand_length * 0.6, 6, GColorWhite);
 }
