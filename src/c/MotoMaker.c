@@ -62,6 +62,10 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
   draw_hand(ctx, center, hour_angle, max_hand_length * 0.6, 6, GColorWhite);
 }
 
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  layer_mark_dirty(s_hands_layer);
+}
+
 static void main_window_load(Window *window) {
   // Get information about the Window
   Layer *root_layer = window_get_root_layer(window);
@@ -73,6 +77,7 @@ static void main_window_load(Window *window) {
 }
 
 static void main_window_unload(Window *window) {
+  layer_destroy(s_hands_layer);
 
 }
 
@@ -85,6 +90,9 @@ static void init() {
     .load = main_window_load,
     .unload = main_window_unload
   });
+
+  // Register with TickTimerService
+  tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 
   // Show the Window on the watch, with animated=true
   window_stack_push(s_main_window, true);
