@@ -1,7 +1,12 @@
 #include <pebble.h>
 
 static Window *s_main_window;
+static Layer *s_background_layer;
 static Layer *s_hands_layer;
+static Layer *s_seconds_layer;
+
+//temporary, until settings work
+static bool enable_seconds = false;
 
 static void draw_line(
   GContext *ctx,
@@ -39,8 +44,8 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   GPoint center = grect_center_point(&bounds);
 
-  graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+  //graphics_context_set_fill_color(ctx, GColorClear);
+  //graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
   const int16_t max_hand_length = (bounds.size.w -10) / 2;
   
@@ -62,22 +67,59 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
   draw_hand(ctx, center, hour_angle, max_hand_length * 0.6, 6, GColorWhite);
 }
 
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  layer_mark_dirty(s_hands_layer);
+static void background_layer_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+
+  // add ticks, logo, and stuff
 }
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Tick handler fired");
+  // Update minute/hour hands if a minute has passed
+  if ((units_changed & MINUTE_UNIT) != 0) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "mark hands layer dirty");
+    layer_mark_dirty(s_hands_layer);
+  }
+
+
+  // Update seconds hand if enabled
+  if (enable_seconds) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "mark seconds layer dirty");
+    //layer_mark_dirty(s_seconds_layer);
+  }
+}
+
+static void initialize_seconds(
+  
+)
 
 static void main_window_load(Window *window) {
   // Get information about the Window
   Layer *root_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(root_layer);
   
+  // Add background layer
+  s_background_layer = layer_create(bounds);
+  layer_add_child(root_layer, s_background_layer);
+  layer_set_update_proc(s_background_layer, background_layer_update_proc);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Background layer added");
+
+  // Add hour and minute hands layer
   s_hands_layer = layer_create(bounds);
   layer_add_child(root_layer, s_hands_layer);
   layer_set_update_proc(s_hands_layer, hands_layer_update_proc);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Hands layer added");
+
+  
 }
 
 static void main_window_unload(Window *window) {
+  layer_destroy(s_background_layer);
   layer_destroy(s_hands_layer);
+  layer_destroy(s_seconds_layer);
 
 }
 
@@ -93,6 +135,7 @@ static void init() {
 
   // Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Subscribed to tick handler");
 
   // Show the Window on the watch, with animated=true
   window_stack_push(s_main_window, true);
