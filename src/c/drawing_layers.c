@@ -46,6 +46,9 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
   // calculate minute hand
   int32_t minute_angle = TRIG_MAX_ANGLE * t->tm_min / 60;
 
+  // draw shadow for minute hand 
+  draw_hand(ctx, center, minute_angle, max_hand_length, 7, GColorBlack);
+
   // draw minute hand 
   draw_hand(ctx, center, minute_angle, max_hand_length, 5, GColorWhite);
   
