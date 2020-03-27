@@ -65,6 +65,7 @@ static void main_window_load(Window *window) {
   s_logo_layer = text_layer_create(logo_bounds);
   text_layer_set_text(s_logo_layer, "pebble");
   text_layer_set_text_color(s_logo_layer, PBL_IF_COLOR_ELSE(GColorLightGray, GColorWhite));
+  text_layer_set_background_color(s_logo_layer, GColorBlack);
   text_layer_set_text_alignment(s_logo_layer, GTextAlignmentCenter);
   //text_layer_set_font(s_logo_layer, fonts_get_system_font());
   layer_add_child(root_layer, text_layer_get_layer(s_logo_layer));
