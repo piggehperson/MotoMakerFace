@@ -7,7 +7,7 @@ static Layer *s_hands_layer;
 static Layer *s_seconds_layer;
 
 //temporary, until settings work
-static bool enable_seconds = false;
+static bool enable_seconds = true;
 
 static void draw_line(
   GContext *ctx,
@@ -42,7 +42,7 @@ static void draw_hand(
 }
 
 static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(layer);
+  GRect bounds = layer_get_unobstructed_bounds(layer);
   GPoint center = grect_center_point(&bounds);
 
   //graphics_context_set_fill_color(ctx, GColorClear);
@@ -78,7 +78,7 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void seconds_layer_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(layer);
+  GRect bounds = layer_get_unobstructed_bounds(layer);
   GPoint center = grect_center_point(&bounds);
 
   time_t now = time(NULL);
