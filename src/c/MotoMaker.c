@@ -21,7 +21,6 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     layer_mark_dirty(s_hands_layer);
   }
 
-
   // Update seconds hand if enabled
   if (enable_seconds) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "mark seconds layer dirty");
@@ -89,6 +88,7 @@ static void main_window_unload(Window *window) {
   layer_destroy(s_background_layer);
   layer_destroy(s_hands_layer);
   layer_destroy(s_seconds_layer);
+  layer_destroy(text_layer_get_layer(s_logo_layer));
 }
 
 static void init() {
