@@ -1,6 +1,7 @@
 #include <pebble.h>
 
 static Window *s_main_window;
+static Layer *s_window_layer;
 
 static Layer *s_background_layer;
 static TextLayer *s_logo_layer;
@@ -8,10 +9,24 @@ static Layer *s_hands_layer;
 static Layer *s_seconds_layer;
 
 //temporary, until settings work
-static bool enable_seconds = true;
+static bool enable_seconds = false;
 
 // Where layer update_procs live to keep things clean
 #include "drawing_layers.c"
+
+static void update_obstructions(void) {
+  // Adapt the layout based on any obstructions
+  GRect full_bounds = layer_get_bounds(s_window_layer);
+  GRect unobstructed_bounds = layer_get_unobstructed_bounds(s_window_layer);
+
+  if (!grect_equal(&full_bounds, &unobstructed_bounds)) {
+    // Screen is obstructed
+    layer_set_hidden(text_layer_get_layer(s_logo_layer), true);
+  } else {
+    // Screen is unobstructed
+    layer_set_hidden(text_layer_get_layer(s_logo_layer), false);
+  }
+}
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Tick handler fired");
@@ -48,14 +63,18 @@ static void initialize_seconds() {
   }
 }
 
+static void app_unobstructed_change(AnimationProgress progress, void *context) {
+  update_obstructions();
+}
+
 static void main_window_load(Window *window) {
   // Get information about the Window
-  Layer *root_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(root_layer);
+  s_window_layer = window_get_root_layer(window);
+  GRect bounds = layer_get_bounds(s_window_layer);
   
   // Add background layer
   s_background_layer = layer_create(bounds);
-  layer_add_child(root_layer, s_background_layer);
+  layer_add_child(s_window_layer, s_background_layer);
   layer_set_update_proc(s_background_layer, background_layer_update_proc);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Background layer added");
 
@@ -67,21 +86,29 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_logo_layer, GColorBlack);
   text_layer_set_text_alignment(s_logo_layer, GTextAlignmentCenter);
   //text_layer_set_font(s_logo_layer, fonts_get_system_font());
-  layer_add_child(root_layer, text_layer_get_layer(s_logo_layer));
+  layer_add_child(s_window_layer, text_layer_get_layer(s_logo_layer));
 
   // Add hour and minute hands layer
   s_hands_layer = layer_create(bounds);
-  layer_add_child(root_layer, s_hands_layer);
+  layer_add_child(s_window_layer, s_hands_layer);
   layer_set_update_proc(s_hands_layer, hands_layer_update_proc);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Hands layer added");
 
   // Create seconds layer
   s_seconds_layer = layer_create(bounds);
   layer_set_update_proc(s_seconds_layer, seconds_layer_update_proc);
-  layer_add_child(root_layer, s_seconds_layer);
+  layer_add_child(s_window_layer, s_seconds_layer);
   // Show or hide seconds layer, and
   // subscribe to correct tick timer service
   initialize_seconds();
+
+  // Subscribe to the change event
+  UnobstructedAreaHandlers handlers = {
+    .change = app_unobstructed_change
+  };
+  unobstructed_area_service_subscribe(handlers, NULL);
+
+  update_obstructions();
 }
 
 static void main_window_unload(Window *window) {
