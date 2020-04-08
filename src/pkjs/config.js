@@ -1,16 +1,16 @@
- 
+
 module.exports = [
   {
     "type": "heading",
     "defaultValue": "Moto Maker"
   },
-  
+
   {
     "type": "section",
     "items": [
       {
         "type": "heading",
-        "defaultValue": "Colors"
+        "defaultValue": "Dial colors"
       },
 
       {
@@ -20,13 +20,13 @@ module.exports = [
       "label": "Background",
       "allowGray": "true",
       },
-      
+
       {
         "type": "color",
         "messageKey": "colorHourHand",
         "defaultValue": "ffffff",
         "label": "Hour hand",
-        "allowGray": "true",
+        "allowGray": "false",
       },
 
       {
@@ -34,7 +34,7 @@ module.exports = [
         "messageKey": "colorMinuteHand",
         "defaultValue": "ffffff",
         "label": "Minute hand",
-        "allowGray": "true",
+        "allowGray": "false",
       },
 
       {
@@ -42,7 +42,7 @@ module.exports = [
         "messageKey": "colorSecondHand",
         "defaultValue": "ff0000",
         "label": "Second hand",
-        "allowGray": "true",
+        "allowGray": "false",
       },
 
       {
@@ -56,11 +56,45 @@ module.exports = [
 
       {
         "type": "color",
-        "messageKey": "colorMarkers",
+        "messageKey": "colorHourMarkers",
         "defaultValue": "aaaaaa",
-        "label": "Markers",
-        "description": "Hour markers, minute markers, and pebble logo",
+        "label": "Hour markers",
+        "description": "12, 3, 6, and 9 o'clock markers",
         "allowGray": "true",
+      },
+
+      {
+        "type": "color",
+        "messageKey": "colorMinuteMarkers",
+        "defaultValue": "ffffff",
+        "label": "Minute markers",
+        "description": "Markers at every 5 minutes around the watch face",
+        "allowGray": "false",
+      },
+    ]
+  },
+
+  {
+    "type": "section",
+    "items": [
+      {
+        "type": "heading",
+        "defaultValue": "Logo"
+      },
+
+      {
+        "type": "input",
+        "messageKey": "textPebbleLogo",
+        "defaultValue": "pebble",
+        "label": "Text to show",
+      },
+
+      {
+        "type": "color",
+        "messageKey": "colorPebbleLogo",
+        "defaultValue": "aaaaaa",
+        "label": "Logo color",
+        "allowGray": "false",
       },
     ]
   },
@@ -83,14 +117,13 @@ module.exports = [
 
       {
         "type": "toggle",
-        "messageKey": "enableHideDotOnDisconnect",
+        "messageKey": "enableVibrateOnDisconnect",
         "defaultValue": "true",
-        "label": "Hide dot when disconnected",
-        "description": "Hides the dot from the middle of the watch face when not connected to your phone"
+        "label": "Vibrate on disconnect",
         },
     ]
   },
-  
+
   {
     "type": "submit",
     "defaultValue": "Save Settings"

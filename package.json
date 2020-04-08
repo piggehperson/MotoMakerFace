@@ -23,20 +23,26 @@
       "aplite",
       "basalt",
       "chalk",
-      "diorite"
+      "diorite",
+      "emery"
     ],
     "watchapp": {
       "watchface": true
     },
     "messageKeys": [
       "colorBackground",
-      "colorDot",
-      "colorMarkers",
       "colorHourHand",
       "colorMinuteHand",
       "colorSecondHand",
+      "colorDot",
+      "colorHourMarkers",
+      "colorMinuteMarkers",
+
+      "textPebbleLogo",
+      "colorPebbleLogo",
+
       "enableSecondHand",
-      "enableHideDotOnDisconnect"
+      "enableVibrateOnDisconnect"
     ],
     "resources": {
       "media": []
