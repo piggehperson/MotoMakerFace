@@ -9,10 +9,14 @@
 typedef struct ClaySettings {
   GColor color_background;
   GColor color_dot;
-  GColor color_markers;
   GColor color_hour_hand;
   GColor color_minute_hand;
   GColor color_second_hand;
+  GColor color_hour_markers;
+  GColor color_minute_markers;
+
+  char text_logo;
+  GColor color_logo;
 
   bool enable_second_hand;
   bool enable_vibrate_on_disconnect;

@@ -17,10 +17,14 @@ ClaySettings settings;
 static void prv_default_settings() {
   settings.color_background = GColorBlack;
   settings.color_dot = GColorWhite;
-  settings.color_markers = PBL_IF_COLOR_ELSE(GColorLightGray, GColorWhite);
   settings.color_hour_hand = GColorWhite;
   settings.color_minute_hand = GColorWhite;
   settings.color_second_hand = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
+  settings.color_hour_markers = GColorLightGray;
+  settings.color_minute_markers = PBL_IF_COLOR_ELSE(GColorLightGray, GColorWhite);
+
+  //settings.text_logo = "pebble";
+  settings.color_logo = PBL_IF_COLOR_ELSE(GColorLightGray, GColorWhite);
 
   settings.enable_second_hand = true;
   settings.enable_vibrate_on_disconnect = true;
@@ -82,7 +86,7 @@ static void prv_update_display() {
   layer_mark_dirty(s_hands_layer);
   layer_mark_dirty(s_seconds_layer);
   initialize_seconds();
-  text_layer_set_text_color(s_logo_layer, settings.color_markers);
+  text_layer_set_text_color(s_logo_layer, settings.color_logo);
   text_layer_set_background_color(s_logo_layer, settings.color_background);
 }
 
@@ -97,9 +101,13 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   if (color_dot_t) {
     settings.color_dot = GColorFromHEX(color_dot_t->value->int32);
   }
-  Tuple *color_markers_t = dict_find(iter, MESSAGE_KEY_colorMarkers);
-  if (color_markers_t) {
-    settings.color_markers = GColorFromHEX(color_markers_t->value->int32);
+  Tuple *color_hour_markers_t = dict_find(iter, MESSAGE_KEY_colorHourMarkers);
+  if (color_hour_markers_t) {
+    settings.color_hour_markers = GColorFromHEX(color_hour_markers_t->value->int32);
+  }
+  Tuple *color_minute_markers_t = dict_find(iter, MESSAGE_KEY_colorMinuteMarkers);
+  if (color_minute_markers_t) {
+    settings.color_minute_markers = GColorFromHEX(color_minute_markers_t->value->int32);
   }
   Tuple *color_hour_hand_t = dict_find(iter, MESSAGE_KEY_colorHourHand);
   if (color_hour_hand_t) {
@@ -114,15 +122,20 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     settings.color_second_hand = GColorFromHEX(color_second_hand_t->value->int32);
   }
 
+  Tuple *color_logo_t = dict_find(iter, MESSAGE_KEY_colorLogo);
+  if (color_logo_t) {
+    settings.color_logo = GColorFromHEX(color_logo_t->value->int32);
+  }
+
   // Bools
   Tuple *enable_second_hand_t = dict_find(iter, MESSAGE_KEY_enableSecondHand);
   if (enable_second_hand_t) {
     settings.enable_second_hand = enable_second_hand_t->value->int32 == 1;
   }
-  /* Tuple *enable_vibrate_on_disconnect_t = dict_find(iter, MESSAGE_KEY_enableVibrateOnDisconnect);
+  Tuple *enable_vibrate_on_disconnect_t = dict_find(iter, MESSAGE_KEY_enableVibrateOnDisconnect);
   if (enable_vibrate_on_disconnect_t) {
     settings.enable_vibrate_on_disconnect = enable_vibrate_on_disconnect_t->value->int32 == 1;
-  } */
+  }
 
   // Save the new settings to persistent storage
   prv_save_settings();
@@ -139,7 +152,7 @@ static void draw_line(
     // Set stroke style
     graphics_context_set_stroke_color(ctx, color);
     graphics_context_set_stroke_width(ctx, thickness);
-    
+
     // Draw stroke
     graphics_draw_line(ctx, start, end);
 }
@@ -166,28 +179,28 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
   GPoint center = grect_center_point(&bounds);
 
   const int16_t max_hand_length = PBL_IF_ROUND_ELSE(((bounds.size.w - 30) / 2), (bounds.size.w - 10) / 2);
-  
+
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
   // calculate minute hand
   int32_t minute_angle = TRIG_MAX_ANGLE * t->tm_min / 60;
 
-  // draw shadow for minute hand 
+  // draw shadow for minute hand
   draw_hand(ctx, center, minute_angle, max_hand_length, 7, settings.color_background);
 
-  // draw minute hand 
+  // draw minute hand
   draw_hand(ctx, center, minute_angle, max_hand_length, 5, settings.color_minute_hand);
-  
-  
+
+
   // calculate hour hand
   int32_t hour_angle = (TRIG_MAX_ANGLE * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6);
-  
+
   // draw shadow for hour hand, so it doesnt get obscured
   draw_hand(ctx, center, hour_angle, max_hand_length * 0.6, 7, settings.color_background);
   // draw hour hand
   draw_hand(ctx, center, hour_angle, max_hand_length * 0.6, 5, settings.color_hour_hand);
 
-  
+
   // Draw a shadow around the center dot
   graphics_context_set_fill_color(ctx, settings.color_background);
   graphics_fill_circle(ctx, center, 7);
@@ -206,10 +219,10 @@ static void seconds_layer_update_proc(Layer *layer, GContext *ctx) {
   // calculate hand
   int32_t angle = TRIG_MAX_ANGLE * t->tm_sec / 60;
 
-  // draw hand 
+  // draw hand
   draw_hand(ctx, center, angle, bounds.size.h, 2, settings.color_second_hand);
-  
-  
+
+
   // Draw a shadow around the center dot
   graphics_context_set_fill_color(ctx, settings.color_background);
   graphics_fill_circle(ctx, center, 7);
@@ -250,7 +263,7 @@ static void main_window_load(Window *window) {
   // Get information about the Window
   s_window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(s_window_layer);
-  
+
   // Add background layer
   s_background_layer = layer_create(bounds);
   layer_add_child(s_window_layer, s_background_layer);
@@ -261,7 +274,7 @@ static void main_window_load(Window *window) {
   GRect logo_bounds = GRect(0, 37, bounds.size.w, 24);
   s_logo_layer = text_layer_create(logo_bounds);
   text_layer_set_text(s_logo_layer, "pebble");
-  text_layer_set_text_color(s_logo_layer, settings.color_markers);
+  text_layer_set_text_color(s_logo_layer, settings.color_logo);
   text_layer_set_background_color(s_logo_layer, settings.color_background);
   text_layer_set_text_alignment(s_logo_layer, GTextAlignmentCenter);
   //text_layer_set_font(s_logo_layer, fonts_get_system_font());
@@ -304,7 +317,7 @@ static void init() {
   // Listen for AppMessages
   app_message_register_inbox_received(prv_inbox_received_handler);
   app_message_open(128, 128);
-  
+
   // Create main Window element and assign to pointer
   s_main_window = window_create();
 

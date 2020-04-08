@@ -84,14 +84,17 @@ module.exports = [
 
       {
         "type": "input",
-        "messageKey": "textPebbleLogo",
+        "messageKey": "textLogo",
         "defaultValue": "pebble",
         "label": "Text to show",
+        "attributes": {
+          "placeholder": "pebble",
+        }
       },
 
       {
         "type": "color",
-        "messageKey": "colorPebbleLogo",
+        "messageKey": "colorLogo",
         "defaultValue": "aaaaaa",
         "label": "Logo color",
         "allowGray": "false",
