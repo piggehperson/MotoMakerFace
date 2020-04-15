@@ -23,7 +23,6 @@ static void prv_default_settings() {
   settings.color_hour_markers = GColorLightGray;
   settings.color_minute_markers = PBL_IF_COLOR_ELSE(GColorLightGray, GColorWhite);
 
-  //settings.text_logo = "pebble";
   settings.color_logo = PBL_IF_COLOR_ELSE(GColorLightGray, GColorWhite);
 
   settings.enable_second_hand = true;
@@ -87,7 +86,7 @@ static void prv_update_display() {
   layer_mark_dirty(s_seconds_layer);
   initialize_seconds();
   text_layer_set_text_color(s_logo_layer, settings.color_logo);
-  text_layer_set_background_color(s_logo_layer, settings.color_background);
+  text_layer_set_background_color(s_logo_layer, GColorClear);
 }
 
 // Handle the response from AppMessage
@@ -122,7 +121,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     settings.color_second_hand = GColorFromHEX(color_second_hand_t->value->int32);
   }
 
-  Tuple *color_logo_t = dict_find(iter, MESSAGE_KEY_colorLogo);
+  Tuple *color_logo_t = dict_find(iter, MESSAGE_KEY_logoColor);
   if (color_logo_t) {
     settings.color_logo = GColorFromHEX(color_logo_t->value->int32);
   }
@@ -233,12 +232,28 @@ static void seconds_layer_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void background_layer_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(layer);
+  GRect bounds = layer_get_unobstructed_bounds(layer);
+  GPoint center = grect_center_point(&bounds);
+
+  const int16_t max_hand_length = PBL_IF_ROUND_ELSE(((bounds.size.w - 30) / 2), (bounds.size.w - 10) / 2);
 
   graphics_context_set_fill_color(ctx, settings.color_background);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
   // add ticks
+  for (int i = 5; i < 60; i = i + 5) {
+    // calculate hand
+    int32_t angle = TRIG_MAX_ANGLE * i / 60;
+
+    // draw hand
+    draw_hand(ctx, center, angle, bounds.size.h, 1, settings.color_minute_markers);
+  }
+
+  // Draw a shadow around the center dot
+  graphics_context_set_fill_color(ctx, settings.color_background);
+  graphics_fill_circle(ctx, center, max_hand_length * 0.7);
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawing background layer");
 }
 
 static void update_obstructions(void) {

@@ -37,8 +37,7 @@
       "colorDot",
       "colorHourMarkers",
       "colorMinuteMarkers",
-      "textLogo",
-      "colorLogo",
+      "logoColor",
       "enableSecondHand",
       "enableVibrateOnDisconnect"
     ],
