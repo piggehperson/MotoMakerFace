@@ -6,7 +6,6 @@ static Window *s_main_window;
 static Layer *s_window_layer;
 
 static Layer *s_background_layer;
-static TextLayer *s_logo_layer;
 static Layer *s_hands_layer;
 static Layer *s_seconds_layer;
 
@@ -85,8 +84,6 @@ static void prv_update_display() {
   layer_mark_dirty(s_hands_layer);
   layer_mark_dirty(s_seconds_layer);
   initialize_seconds();
-  text_layer_set_text_color(s_logo_layer, settings.color_logo);
-  text_layer_set_background_color(s_logo_layer, GColorClear);
 }
 
 // Handle the response from AppMessage
@@ -253,25 +250,21 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, settings.color_background);
   graphics_fill_circle(ctx, center, max_hand_length * 0.7);
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawing background layer");
-}
-
-static void update_obstructions(void) {
-  // Adapt the layout based on any obstructions
-  GRect full_bounds = layer_get_bounds(s_window_layer);
-  GRect unobstructed_bounds = layer_get_unobstructed_bounds(s_window_layer);
-
-  if (!grect_equal(&full_bounds, &unobstructed_bounds)) {
-    // Screen is obstructed
-    layer_set_hidden(text_layer_get_layer(s_logo_layer), true);
-  } else {
-    // Screen is unobstructed
-    layer_set_hidden(text_layer_get_layer(s_logo_layer), false);
+  if (layer_get_bounds(layer).size.h == layer_get_unobstructed_bounds(layer).size.h) {
+    // Draw pebble logo textLogo
+    graphics_context_set_text_color(ctx, settings.color_logo);
+    graphics_draw_text(
+      ctx,
+      "pebble",
+      fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD),
+      GRect(0, 37, bounds.size.w, 24),
+      GTextOverflowModeTrailingEllipsis,
+      GTextAlignmentCenter,
+      0
+    );
   }
-}
 
-static void app_unobstructed_change(AnimationProgress progress, void *context) {
-  update_obstructions();
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawing background layer");
 }
 
 static void main_window_load(Window *window) {
@@ -284,16 +277,6 @@ static void main_window_load(Window *window) {
   layer_add_child(s_window_layer, s_background_layer);
   layer_set_update_proc(s_background_layer, background_layer_update_proc);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Background layer added");
-
-  // Add pebble logo layer
-  GRect logo_bounds = GRect(0, 37, bounds.size.w, 24);
-  s_logo_layer = text_layer_create(logo_bounds);
-  text_layer_set_text(s_logo_layer, "pebble");
-  text_layer_set_text_color(s_logo_layer, settings.color_logo);
-  text_layer_set_background_color(s_logo_layer, settings.color_background);
-  text_layer_set_text_alignment(s_logo_layer, GTextAlignmentCenter);
-  //text_layer_set_font(s_logo_layer, fonts_get_system_font());
-  layer_add_child(s_window_layer, text_layer_get_layer(s_logo_layer));
 
   // Add hour and minute hands layer
   s_hands_layer = layer_create(bounds);
@@ -308,22 +291,12 @@ static void main_window_load(Window *window) {
   // Show or hide seconds layer, and
   // subscribe to correct tick timer service
   initialize_seconds();
-
-  // Subscribe to the obstructions event
-  UnobstructedAreaHandlers handlers = {
-    .change = app_unobstructed_change
-  };
-  unobstructed_area_service_subscribe(handlers, NULL);
-
-  // Make sure watch face handles obstructions correctly on startup
-  update_obstructions();
 }
 
 static void main_window_unload(Window *window) {
   layer_destroy(s_background_layer);
   layer_destroy(s_hands_layer);
   layer_destroy(s_seconds_layer);
-  layer_destroy(text_layer_get_layer(s_logo_layer));
 }
 
 static void init() {
