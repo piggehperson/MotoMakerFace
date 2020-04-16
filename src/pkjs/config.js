@@ -71,32 +71,12 @@ module.exports = [
         "description": "Markers at every 5 minutes around the watch face",
         "allowGray": "false",
       },
-    ]
-  },
-
-  {
-    "type": "section",
-    "items": [
-      {
-        "type": "heading",
-        "defaultValue": "Logo"
-      },
-
-      {
-        "type": "input",
-        "messageKey": "textLogo",
-        "defaultValue": "pebble",
-        "label": "Text to show",
-        "attributes": {
-          "placeholder": "pebble",
-        }
-      },
 
       {
         "type": "color",
-        "messageKey": "colorLogo",
+        "messageKey": "logoColor",
         "defaultValue": "aaaaaa",
-        "label": "Logo color",
+        "label": "Pebble logo",
         "allowGray": "false",
       },
     ]

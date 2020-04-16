@@ -15,7 +15,6 @@ typedef struct ClaySettings {
   GColor color_hour_markers;
   GColor color_minute_markers;
 
-  char text_logo;
   GColor color_logo;
 
   bool enable_second_hand;

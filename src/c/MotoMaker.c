@@ -245,10 +245,17 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
     // draw hand
     draw_hand(ctx, center, angle, bounds.size.h, 1, settings.color_minute_markers);
   }
+  for (int i = 0; i < 60; i = i + 15) {
+    // calculate hand
+    int32_t angle = TRIG_MAX_ANGLE * i / 60;
+
+    // draw hand
+    draw_hand(ctx, center, angle, bounds.size.h, 2, settings.color_hour_markers);
+  }
 
   // Draw a shadow around the center dot
   graphics_context_set_fill_color(ctx, settings.color_background);
-  graphics_fill_circle(ctx, center, max_hand_length * 0.7);
+  graphics_fill_circle(ctx, center, max_hand_length * 0.8);
 
   if (layer_get_bounds(layer).size.h == layer_get_unobstructed_bounds(layer).size.h) {
     // Draw pebble logo textLogo
