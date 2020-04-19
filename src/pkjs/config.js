@@ -26,7 +26,6 @@ module.exports = [
         "messageKey": "colorHourHand",
         "defaultValue": "ffffff",
         "label": "Hour hand",
-        "allowGray": "false",
       },
 
       {
@@ -34,7 +33,6 @@ module.exports = [
         "messageKey": "colorMinuteHand",
         "defaultValue": "ffffff",
         "label": "Minute hand",
-        "allowGray": "false",
       },
 
       {
@@ -42,7 +40,6 @@ module.exports = [
         "messageKey": "colorSecondHand",
         "defaultValue": "ff0000",
         "label": "Second hand",
-        "allowGray": "false",
       },
 
       {
@@ -60,7 +57,6 @@ module.exports = [
         "defaultValue": "aaaaaa",
         "label": "Hour markers",
         "description": "12, 3, 6, and 9 o'clock markers",
-        "allowGray": "true",
       },
 
       {
@@ -69,7 +65,6 @@ module.exports = [
         "defaultValue": "ffffff",
         "label": "Minute markers",
         "description": "Markers at every 5 minutes around the watch face",
-        "allowGray": "false",
       },
 
       {
@@ -77,7 +72,6 @@ module.exports = [
         "messageKey": "logoColor",
         "defaultValue": "aaaaaa",
         "label": "Pebble logo",
-        "allowGray": "false",
       },
     ]
   },
