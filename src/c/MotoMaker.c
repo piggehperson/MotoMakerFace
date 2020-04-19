@@ -137,6 +137,13 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   prv_save_settings();
 }
 
+static void bluetooth_callback(bool connected) {
+  if (!connected && settings.enable_vibrate_on_disconnect) {
+    // vibrate watch
+    vibes_double_pulse();
+  }
+}
+
 // Where layer update_procs live to keep things clean
 static void draw_line(
   GContext *ctx,
@@ -298,6 +305,13 @@ static void main_window_load(Window *window) {
   // Show or hide seconds layer, and
   // subscribe to correct tick timer service
   initialize_seconds();
+
+  // Register for Bluetooth connection updates
+  connection_service_subscribe((ConnectionHandlers) {
+    .pebble_app_connection_handler = bluetooth_callback
+  });
+  // Show the correct state of the BT connection from the start
+  bluetooth_callback(connection_service_peek_pebble_app_connection());
 }
 
 static void main_window_unload(Window *window) {
