@@ -219,7 +219,7 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
   int32_t minute_angle = TRIG_MAX_ANGLE * t->tm_min / 60;
 
   // draw minute hand
-  draw_hand(ctx, center, minute_angle, 10, max_hand_length, 5, settings.color_minute_hand, false);
+  draw_hand(ctx, center, minute_angle, 10, max_hand_length, 5, settings.color_minute_hand, true);
 
 
   // calculate hour hand
@@ -254,8 +254,6 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_unobstructed_bounds(layer);
   GPoint center = grect_center_point(&bounds);
 
-  const int16_t max_hand_length = PBL_IF_ROUND_ELSE(((bounds.size.w - 30) / 2), (bounds.size.w - 10) / 2);
-
   graphics_context_set_fill_color(ctx, settings.color_background);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
@@ -263,48 +261,36 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
 
   // 5 minute marks
   for (int i = 5; i < 60; i = i + 5) {
-
-    // calculate angle
-    //int32_t angle = TRIG_MAX_ANGLE * i / 60;
-    
-    // // draw line of angle Angle off the screen
-    // int probe_x = (int16_t)(sin_lookup(angle) * (int32_t)layer_get_bounds(layer).size.h / TRIG_MAX_RATIO) + center.x;
-    // int probe_y = (int16_t)(-cos_lookup(angle) * (int32_t)layer_get_bounds(layer).size.h / TRIG_MAX_RATIO) + center.y;
-
-    // int slope = (center.y - probe_y)/(center.x - probe_y);
-
-    // int intercept_x;
-    // int intercept_y;
-
-    // calculate hand
+    // calculate ray
     int32_t angle = TRIG_MAX_ANGLE * i / 60;
 
-    // draw hand
-    draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 1, settings.color_minute_markers, false);
+    // draw ray
+    draw_hand(ctx, center, angle, 0, bounds.size.h, 1, settings.color_minute_markers, false);
   }
 
-  // 12 3 6 9
+  // 3 6 9 o clock
   for (int i = 15; i < 60; i = i + 15) {
-    // calculate hand
+    // calculate ray
     int32_t angle = TRIG_MAX_ANGLE * i / 60;
 
-    // draw hand
-    draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers, false);
+    // draw ray
+    draw_hand(ctx, center, angle, 0, bounds.size.h, 2, settings.color_hour_markers, false);
   }
 
+  // 12 o clock
   int32_t angle = TRIG_MAX_ANGLE * 0 / 60;
   if (settings.enable_double_12) {
 
-    // draw hand
-    draw_hand(ctx, (GPoint) {.x = center.x - 3, .y = center.y}, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers, false);
-    draw_hand(ctx, (GPoint) {.x = center.x + 3, .y = center.y}, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers, false);
+    // draw double 12
+    draw_hand(ctx, (GPoint) {.x = center.x - 3, .y = center.y}, 90, 0, bounds.size.h, 2, settings.color_hour_markers, false);
+    draw_hand(ctx, (GPoint) {.x = center.x + 3, .y = center.y}, 90, 0, bounds.size.h, 2, settings.color_hour_markers, false);
   } else {
-    // draw hand
-    draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers, false);
+    // draw single 12
+    draw_hand(ctx, center, 90, 0, bounds.size.h, 2, settings.color_hour_markers, false);
   }
 
   if (
-    layer_get_bounds(layer).size.h == layer_get_unobstructed_bounds(layer).size.h &&
+    layer_get_bounds(layer).size.h == bounds.size.h &&
     settings.enable_wordmark
   ) {
     // Draw wordmark
@@ -319,6 +305,20 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
       0
     );
   }
+  
+  const int16_t mark_inset = PBL_IF_ROUND_ELSE(30, 26);
+
+  // erase rays beyond inset
+  graphics_context_set_fill_color(ctx, settings.color_background);
+  PBL_IF_ROUND_ELSE( 
+    graphics_fill_circle(ctx, center, (bounds.size.w / 2) - mark_inset),
+    graphics_fill_rect(
+      ctx,
+      GRect(mark_inset, mark_inset, bounds.size.w - (2 *mark_inset), bounds.size.h - (2 * mark_inset)),
+      0,
+      GCornerNone
+      )
+  );
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawing background layer");
 }
