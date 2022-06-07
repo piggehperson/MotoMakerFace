@@ -288,6 +288,20 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
     // draw single 12
     draw_hand(ctx, center, 90, 0, bounds.size.h, 2, settings.color_hour_markers, false);
   }
+  
+  const int16_t mark_inset = PBL_IF_ROUND_ELSE(30, 26);
+
+  // erase rays beyond inset
+  graphics_context_set_fill_color(ctx, settings.color_background);
+  PBL_IF_ROUND_ELSE( 
+    graphics_fill_circle(ctx, center, (bounds.size.w / 2) - mark_inset),
+    graphics_fill_rect(
+      ctx,
+      GRect(mark_inset, mark_inset, bounds.size.w - (2 *mark_inset), bounds.size.h - (2 * mark_inset)),
+      0,
+      GCornerNone
+      )
+  );
 
   if (
     layer_get_bounds(layer).size.h == bounds.size.h &&
@@ -305,22 +319,8 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
       0
     );
   }
-  
-  const int16_t mark_inset = PBL_IF_ROUND_ELSE(30, 26);
 
-  // erase rays beyond inset
-  graphics_context_set_fill_color(ctx, settings.color_background);
-  PBL_IF_ROUND_ELSE( 
-    graphics_fill_circle(ctx, center, (bounds.size.w / 2) - mark_inset),
-    graphics_fill_rect(
-      ctx,
-      GRect(mark_inset, mark_inset, bounds.size.w - (2 *mark_inset), bounds.size.h - (2 * mark_inset)),
-      0,
-      GCornerNone
-      )
-  );
-
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawing background layer");
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Background layer drawn");
 }
 
 static void main_window_load(Window *window) {
