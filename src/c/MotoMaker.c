@@ -219,7 +219,7 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
   int32_t minute_angle = TRIG_MAX_ANGLE * t->tm_min / 60;
 
   // draw minute hand
-  draw_hand(ctx, center, minute_angle, 10, max_hand_length, 5, settings.color_minute_hand, true);
+  draw_hand(ctx, center, minute_angle, 10, max_hand_length, 5, settings.color_minute_hand, false);
 
 
   // calculate hour hand
@@ -263,6 +263,19 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
 
   // 5 minute marks
   for (int i = 5; i < 60; i = i + 5) {
+
+    // calculate angle
+    //int32_t angle = TRIG_MAX_ANGLE * i / 60;
+    
+    // // draw line of angle Angle off the screen
+    // int probe_x = (int16_t)(sin_lookup(angle) * (int32_t)layer_get_bounds(layer).size.h / TRIG_MAX_RATIO) + center.x;
+    // int probe_y = (int16_t)(-cos_lookup(angle) * (int32_t)layer_get_bounds(layer).size.h / TRIG_MAX_RATIO) + center.y;
+
+    // int slope = (center.y - probe_y)/(center.x - probe_y);
+
+    // int intercept_x;
+    // int intercept_y;
+
     // calculate hand
     int32_t angle = TRIG_MAX_ANGLE * i / 60;
 
@@ -270,11 +283,22 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
     draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 1, settings.color_minute_markers, false);
   }
 
-  // 12 3 6 9 marks
-  for (int i = 0; i < 60; i = i + 15) {
+  // 12 3 6 9
+  for (int i = 15; i < 60; i = i + 15) {
     // calculate hand
     int32_t angle = TRIG_MAX_ANGLE * i / 60;
 
+    // draw hand
+    draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers, false);
+  }
+
+  int32_t angle = TRIG_MAX_ANGLE * 0 / 60;
+  if (settings.enable_double_12) {
+
+    // draw hand
+    draw_hand(ctx, (GPoint) {.x = center.x - 3, .y = center.y}, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers, false);
+    draw_hand(ctx, (GPoint) {.x = center.x + 3, .y = center.y}, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers, false);
+  } else {
     // draw hand
     draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers, false);
   }
