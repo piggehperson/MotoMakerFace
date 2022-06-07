@@ -7,6 +7,10 @@
 
 // A structure containing our settings
 typedef struct ClaySettings {
+  bool enable_wordmark;
+  char text_wordmark;
+  bool enable_double_12;
+  
   GColor color_background;
   GColor color_dot;
   GColor color_hour_hand;
@@ -14,8 +18,7 @@ typedef struct ClaySettings {
   GColor color_second_hand;
   GColor color_hour_markers;
   GColor color_minute_markers;
-
-  GColor color_logo;
+  GColor color_wordmark;
 
   bool enable_second_hand;
   bool enable_vibrate_on_disconnect;

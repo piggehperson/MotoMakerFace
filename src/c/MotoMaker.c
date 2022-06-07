@@ -14,6 +14,12 @@ ClaySettings settings;
 
 // Initialize the default settings
 static void prv_default_settings() {
+  settings.enable_wordmark = true;
+  // const char *default = "pebble";
+  // memset(settings.text_wordmark, 0, sizeof settings.text_wordmark);
+  // strncpy(settings.text_wordmark, default, sizeof settings.text_wordmark-1);
+  settings.enable_double_12 = true;
+  
   settings.color_background = GColorBlack;
   settings.color_dot = GColorWhite;
   settings.color_hour_hand = GColorWhite;
@@ -21,8 +27,7 @@ static void prv_default_settings() {
   settings.color_second_hand = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
   settings.color_hour_markers = GColorLightGray;
   settings.color_minute_markers = PBL_IF_COLOR_ELSE(GColorLightGray, GColorWhite);
-
-  settings.color_logo = PBL_IF_COLOR_ELSE(GColorLightGray, GColorWhite);
+  settings.color_wordmark = PBL_IF_COLOR_ELSE(GColorLightGray, GColorWhite);
 
   settings.enable_second_hand = true;
   settings.enable_vibrate_on_disconnect = true;
@@ -88,6 +93,20 @@ static void prv_update_display() {
 
 // Handle the response from AppMessage
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+  // Widgets
+  Tuple *enable_wordmark_t = dict_find(iter, MESSAGE_KEY_enableWordmark);
+  if (enable_wordmark_t) {
+    settings.enable_wordmark = enable_wordmark_t->value->int32 == 1;
+  }
+  // Tuple *text_wordmark_t = dict_find(iter, MESSAGE_KEY_textWordmark);
+  // if (text_wordmark_t) {
+  //   settings.text_wordmark = (char) text_wordmark_t->value->cstring;
+  // }
+  Tuple *enable_double_12_t = dict_find(iter, MESSAGE_KEY_enableDouble12);
+  if (enable_double_12_t) {
+    settings.enable_double_12 = enable_double_12_t->value->int32 == 1;
+  }
+  
   // Colors
   Tuple *color_background_t = dict_find(iter, MESSAGE_KEY_colorBackground);
   if (color_background_t) {
@@ -117,13 +136,12 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   if (color_second_hand_t) {
     settings.color_second_hand = GColorFromHEX(color_second_hand_t->value->int32);
   }
-
-  Tuple *color_logo_t = dict_find(iter, MESSAGE_KEY_logoColor);
+  Tuple *color_logo_t = dict_find(iter, MESSAGE_KEY_colorWordmark);
   if (color_logo_t) {
-    settings.color_logo = GColorFromHEX(color_logo_t->value->int32);
+    settings.color_wordmark = GColorFromHEX(color_logo_t->value->int32);
   }
 
-  // Bools
+  // Features
   Tuple *enable_second_hand_t = dict_find(iter, MESSAGE_KEY_enableSecondHand);
   if (enable_second_hand_t) {
     settings.enable_second_hand = enable_second_hand_t->value->int32 == 1;
@@ -256,9 +274,12 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
     draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers);
   }
 
-  if (layer_get_bounds(layer).size.h == layer_get_unobstructed_bounds(layer).size.h) {
-    // Draw pebble logo textLogo
-    graphics_context_set_text_color(ctx, settings.color_logo);
+  if (
+    layer_get_bounds(layer).size.h == layer_get_unobstructed_bounds(layer).size.h &&
+    settings.enable_wordmark
+  ) {
+    // Draw wordmark
+    graphics_context_set_text_color(ctx, settings.color_wordmark);
     graphics_draw_text(
       ctx,
       "pebble",

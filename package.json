@@ -30,6 +30,9 @@
       "watchface": true
     },
     "messageKeys": [
+      "enableWordmark",
+      "textWordmark",
+      "enableDouble12",
       "colorBackground",
       "colorHourHand",
       "colorMinuteHand",
@@ -37,7 +40,7 @@
       "colorDot",
       "colorHourMarkers",
       "colorMinuteMarkers",
-      "logoColor",
+      "colorWordmark",
       "enableSecondHand",
       "enableVibrateOnDisconnect"
     ],

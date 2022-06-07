@@ -10,6 +10,42 @@ module.exports = [
     "items": [
       {
         "type": "heading",
+        "defaultValue": "Widgets"
+      },
+
+      {
+        "type": "toggle",
+        "messageKey": "enableWordmark",
+        "defaultValue": "true",
+        "label": "Show wordmark",
+      },
+
+      // {
+      //   "type": "input",
+      //   "messageKey": "textWordmark",
+      //   "defaultValue": "pebble",
+      //   "label": "Wordmark text",
+      //   "attributes": {
+      //     "placeholder": "eg. pebble",
+      //     "limit": 25,
+      //   },
+      //   "description": "Text at top of dial",
+      // },
+
+      {
+        "type": "toggle",
+        "messageKey": "enableDouble12",
+        "defaultValue": "true",
+        "label": "Double mark at 12 o'clock position",
+        },
+    ]
+  },
+
+  {
+    "type": "section",
+    "items": [
+      {
+        "type": "heading",
         "defaultValue": "Dial colors"
       },
 
@@ -69,9 +105,10 @@ module.exports = [
 
       {
         "type": "color",
-        "messageKey": "logoColor",
+        "messageKey": "colorWordmark",
         "defaultValue": "aaaaaa",
-        "label": "Pebble logo",
+        "label": "Wordmark at top of dial",
+        "allowGray": false,
       },
     ]
   },
