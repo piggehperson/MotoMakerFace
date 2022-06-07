@@ -180,28 +180,29 @@ static void draw_line(
 
 static void draw_hand(
   GContext *ctx,
-  GPoint center,
+  GPoint start,
   int angle,
   int inset,
   int length,
   int thickness,
-  GColor color
+  GColor color,
+  bool shadow
 ) {
 
   // Calculate where the start point of the hand goes
   GPoint hand_start = {
-    .x = (int16_t)(sin_lookup(angle) * (int32_t)inset / TRIG_MAX_RATIO) + center.x,
-    .y = (int16_t)(-cos_lookup(angle) * (int32_t)inset / TRIG_MAX_RATIO) + center.y,
+    .x = (int16_t)(sin_lookup(angle) * (int32_t)inset / TRIG_MAX_RATIO) + start.x,
+    .y = (int16_t)(-cos_lookup(angle) * (int32_t)inset / TRIG_MAX_RATIO) + start.y,
   };
 
   // Calculate where the end point of the hand goes
   GPoint hand_end = {
-    .x = (int16_t)(sin_lookup(angle) * (int32_t)length / TRIG_MAX_RATIO) + center.x,
-    .y = (int16_t)(-cos_lookup(angle) * (int32_t)length / TRIG_MAX_RATIO) + center.y,
+    .x = (int16_t)(sin_lookup(angle) * (int32_t)length / TRIG_MAX_RATIO) + start.x,
+    .y = (int16_t)(-cos_lookup(angle) * (int32_t)length / TRIG_MAX_RATIO) + start.y,
   };
 
   // Draw a shadow around the hand
-  draw_line(ctx, hand_start, hand_end, thickness + 2, settings.color_background);
+  if (shadow) {draw_line(ctx, hand_start, hand_end, thickness + 2, settings.color_background);}
   // Draw the actual hand
   draw_line(ctx, hand_start, hand_end, thickness, color);
 }
@@ -218,14 +219,14 @@ static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
   int32_t minute_angle = TRIG_MAX_ANGLE * t->tm_min / 60;
 
   // draw minute hand
-  draw_hand(ctx, center, minute_angle, 10, max_hand_length, 5, settings.color_minute_hand);
+  draw_hand(ctx, center, minute_angle, 10, max_hand_length, 5, settings.color_minute_hand, true);
 
 
   // calculate hour hand
   int32_t hour_angle = (TRIG_MAX_ANGLE * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6);
 
   // draw hour hand
-  draw_hand(ctx, center, hour_angle, 10, max_hand_length * 0.6, 5, settings.color_hour_hand);
+  draw_hand(ctx, center, hour_angle, 10, max_hand_length * 0.6, 5, settings.color_hour_hand, true);
 
   // Draw the center dot
   graphics_context_set_fill_color(ctx, settings.color_dot);
@@ -242,7 +243,7 @@ static void seconds_layer_update_proc(Layer *layer, GContext *ctx) {
   int32_t angle = TRIG_MAX_ANGLE * t->tm_sec / 60;
 
   // draw hand
-  draw_hand(ctx, center, angle, 10, bounds.size.h, 2, settings.color_second_hand);
+  draw_hand(ctx, center, angle, 10, bounds.size.h, 2, settings.color_second_hand, true);
 
   // Draw the center dot
   graphics_context_set_fill_color(ctx, settings.color_dot);
@@ -259,19 +260,23 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
   // add ticks
+
+  // 5 minute marks
   for (int i = 5; i < 60; i = i + 5) {
     // calculate hand
     int32_t angle = TRIG_MAX_ANGLE * i / 60;
 
     // draw hand
-    draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 1, settings.color_minute_markers);
+    draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 1, settings.color_minute_markers, false);
   }
+
+  // 12 3 6 9 marks
   for (int i = 0; i < 60; i = i + 15) {
     // calculate hand
     int32_t angle = TRIG_MAX_ANGLE * i / 60;
 
     // draw hand
-    draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers);
+    draw_hand(ctx, center, angle, max_hand_length * 0.8, bounds.size.h, 2, settings.color_hour_markers, false);
   }
 
   if (
