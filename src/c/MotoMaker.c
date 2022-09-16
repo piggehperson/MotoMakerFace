@@ -1,5 +1,7 @@
 #include <pebble.h>
+#include "drawing_utils.c"
 #include "settings.h"
+#include "hands_layer.c"
 
 
 static Window *s_main_window;
@@ -163,75 +165,6 @@ static void bluetooth_callback(bool connected) {
 }
 
 // Where layer update_procs live to keep things clean
-static void draw_line(
-  GContext *ctx,
-  GPoint start,
-  GPoint end,
-  int thickness,
-  GColor color
-  ) {
-    // Set stroke style
-    graphics_context_set_stroke_color(ctx, color);
-    graphics_context_set_stroke_width(ctx, thickness);
-
-    // Draw stroke
-    graphics_draw_line(ctx, start, end);
-}
-
-static void draw_hand(
-  GContext *ctx,
-  GPoint start,
-  int angle,
-  int inset,
-  int length,
-  int thickness,
-  GColor color,
-  bool shadow
-) {
-
-  // Calculate where the start point of the hand goes
-  GPoint hand_start = {
-    .x = (int16_t)(sin_lookup(angle) * (int32_t)inset / TRIG_MAX_RATIO) + start.x,
-    .y = (int16_t)(-cos_lookup(angle) * (int32_t)inset / TRIG_MAX_RATIO) + start.y,
-  };
-
-  // Calculate where the end point of the hand goes
-  GPoint hand_end = {
-    .x = (int16_t)(sin_lookup(angle) * (int32_t)length / TRIG_MAX_RATIO) + start.x,
-    .y = (int16_t)(-cos_lookup(angle) * (int32_t)length / TRIG_MAX_RATIO) + start.y,
-  };
-
-  // Draw a shadow around the hand
-  if (shadow) {draw_line(ctx, hand_start, hand_end, thickness + 2, settings.color_background);}
-  // Draw the actual hand
-  draw_line(ctx, hand_start, hand_end, thickness, color);
-}
-
-static void hands_layer_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_unobstructed_bounds(layer);
-  GPoint center = grect_center_point(&bounds);
-
-  const int16_t max_hand_length = PBL_IF_ROUND_ELSE(((bounds.size.w - 30) / 2), (bounds.size.w - 10) / 2);
-
-  time_t now = time(NULL);
-  struct tm *t = localtime(&now);
-  // calculate minute hand
-  int32_t minute_angle = TRIG_MAX_ANGLE * t->tm_min / 60;
-
-  // draw minute hand
-  draw_hand(ctx, center, minute_angle, 10, max_hand_length, 5, settings.color_minute_hand, true);
-
-
-  // calculate hour hand
-  int32_t hour_angle = (TRIG_MAX_ANGLE * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6);
-
-  // draw hour hand
-  draw_hand(ctx, center, hour_angle, 10, max_hand_length * 0.6, 5, settings.color_hour_hand, true);
-
-  // Draw the center dot
-  graphics_context_set_fill_color(ctx, settings.color_dot);
-  graphics_fill_circle(ctx, center, 3);
-}
 
 static void seconds_layer_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_unobstructed_bounds(layer);
@@ -243,7 +176,7 @@ static void seconds_layer_update_proc(Layer *layer, GContext *ctx) {
   int32_t angle = TRIG_MAX_ANGLE * t->tm_sec / 60;
 
   // draw hand
-  draw_hand(ctx, center, angle, 10, bounds.size.h, 2, settings.color_second_hand, true);
+  draw_hand(ctx, center, angle, 10, bounds.size.h, 2, settings.color_second_hand, settings.color_background);
 
   // Draw the center dot
   graphics_context_set_fill_color(ctx, settings.color_dot);
@@ -265,7 +198,7 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
     int32_t angle = TRIG_MAX_ANGLE * i / 60;
 
     // draw ray
-    draw_hand(ctx, center, angle, 0, bounds.size.h, 1, settings.color_minute_markers, false);
+    draw_hand(ctx, center, angle, 0, bounds.size.h, 1, settings.color_minute_markers, settings.color_background);
   }
 
   // 3 6 9 o clock
@@ -274,7 +207,7 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
     int32_t angle = TRIG_MAX_ANGLE * i / 60;
 
     // draw ray
-    draw_hand(ctx, center, angle, 0, bounds.size.h, 2, settings.color_hour_markers, false);
+    draw_hand(ctx, center, angle, 0, bounds.size.h, 2, settings.color_hour_markers, settings.color_background);
   }
 
   // 12 o clock
@@ -282,11 +215,11 @@ static void background_layer_update_proc(Layer *layer, GContext *ctx) {
   if (settings.enable_double_12) {
 
     // draw double 12
-    draw_hand(ctx, (GPoint) {.x = center.x - 3, .y = center.y}, 90, 0, bounds.size.h, 2, settings.color_hour_markers, false);
-    draw_hand(ctx, (GPoint) {.x = center.x + 3, .y = center.y}, 90, 0, bounds.size.h, 2, settings.color_hour_markers, false);
+    draw_hand(ctx, (GPoint) {.x = center.x - 3, .y = center.y}, 90, 0, bounds.size.h, 2, settings.color_hour_markers, settings.color_background);
+    draw_hand(ctx, (GPoint) {.x = center.x + 3, .y = center.y}, 90, 0, bounds.size.h, 2, settings.color_hour_markers, settings.color_background);
   } else {
     // draw single 12
-    draw_hand(ctx, center, 90, 0, bounds.size.h, 2, settings.color_hour_markers, false);
+    draw_hand(ctx, center, 90, 0, bounds.size.h, 2, settings.color_hour_markers, settings.color_background);
   }
   
   const int16_t mark_inset = PBL_IF_ROUND_ELSE(30, 26);
